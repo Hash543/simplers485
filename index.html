@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="UTF-8">
+    <!-- https://developer.mozilla.org/en-US/docs/Web/HTTP/CSP -->
+    <title>SS訊號</title>
+    <script type="text/javascript" src="./vue.js"></script>
+    <style type="text/css">
+			.ssStyle{
+				font-size:100px;
+				color:blue;
+				margin:auto;
+				display:block;
+				height:400px;
+				width:100%;
+			}
+			.phStyle{
+				font-size:100px;
+				color:blue;
+				margin:auto;
+				display:block;
+				height:400px;
+				width:100%;
+			}
+			.title{
+				font-size:250px;
+				letter-spacing: 2px;
+				margin-right:15px;
+			}
+      .over{
+        color:red;
+      }
+    </style>
+  </head>
+  <body>
+		<div id="app" style="width:100%;display:flexbox">
+			<div :class="{over: (ph<6 || ph>9)}" class="phStyle">
+				<div style="height:800px;text-align:center;vertical-align:middle;line-height:1;font-size:250px">
+					<span class="title">PH:</span>{{ph}}
+				</div>
+			</div>
+			<div  :class="{over: ss>200}" class="ssStyle">
+				<div style="height:800px;text-align:center;vertical-align:middle;line-height:1;font-size:250px">
+					<span class="title">SS:</span>{{ss}}
+				</div>
+			</div>
+		</div>
+    <!-- You can also require other files to run in this process -->
+    <script src="./renderer.js"></script>
+    <script type="text/javascript">
+      var app = new Vue({
+        el: '#app',
+        data: {
+					ph: 6,
+          ss: 0
+        },
+        mounted: function(){
+        	// On Windows Only...
+        	let self = this
+		const { exec } = require('child_process');
+		//var gpiop = require('rpi-gpio').promise;
+	var autoupdate = function(){
+		//var row = JSON.parse(fs.readFileSync("rsdata.json")
+		exec('node /home/pi/Desktop/rs485/readss.js', (error, stdout, stderr) => {
+			if (error) {
+				console.error(`exec error: ${error}`);
+				return;
+			}
+			var overSign = false
+			console.log(stdout);
+			var row = JSON.parse(stdout)
+			self.ss=row.ss;
+			self.ph=row.ph;
+			// gpiop.setup(7, gpiop.DIR_OUT)
+			// 	.then(() => {
+			// 			return gpiop.write(7, true)
+			// 	})
+			// 	.catch((err) => {
+			// 			console.log('Error: ', err.toString())
+			// 	}) 
+			console.log(`stdout: ${stdout}`);
+			console.error(`stderr: ${stderr}`);
+			autoupdate()
+		});
+	}
+	autoupdate()
+			//const { spawn } = require('child_process');
+			//const bat = spawn('node', ['/home/pi/Desktop/rs485/readss.js']);
+
+			//bat.stdout.on('data', (data) => {
+			  //self.ss = data
+			//});
+
+			//bat.stderr.on('data', (data) => {
+			 // console.error(data.toString());
+			//});
+
+			//bat.on('exit', (code) => {
+
+			  //console.log(`Child exited with code ${code}`);
+			//});
+        }
+      })
+    </script>
+  </body>
+</html>
